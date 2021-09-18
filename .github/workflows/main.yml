@@ -1,0 +1,38 @@
+name: CI-prod-go-app-user-auth-service
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.x
+
+      - name: Setup Go Private Modules
+        env:
+          GITHUB_USER: saul-gush
+          GITHUB_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+        run: |
+          # go env -w GOPRIVATE=github.com/gushai-platform
+          git config --global url."https://$GITHUB_USER:$GITHUB_TOKEN@github.com".insteadOf "https://github.com"
+      - name: Git Clone Action
+        # You may pin to the exact commit or the version.
+        # uses: sudosubin/git-clone-action@8a93ce24d47782e30077508cccacf8a05a891bae
+        uses: sudosubin/git-clone-action@v1.0.1
+        with:
+          # Repository owner and name. Ex: sudosubin/git-clone-action
+          repository: gushai-platform/go-app-user-auth-service
+          # Git host platform. Ex: github, gitlab, bitbucket, gitee, or else (git.suckless.org, ...)
+          # Git branch or tag to checkout.
+          # Relative path from current directory, where to clone.
+      - name: Run Test Cases
+        run: ./localTests.sh
